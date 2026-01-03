@@ -13,7 +13,8 @@ const app = express();
 // Security Middlewares
 app.use(helmet()); // secure headers
 app.use(cors({
-  origin: "http://localhost:3000", // Frontend URL
+  origin: ["http://localhost:8081", "http://localhost:8082"],
+  methods: "GET,POST,PUT,DELETE",
   credentials: true
 }));
 app.use(cookieParser());
