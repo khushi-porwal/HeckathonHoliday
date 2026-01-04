@@ -1,13 +1,22 @@
-import { View, Text, Image, TouchableOpacity, TextInput, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeDashboard() {
   return (
     <View style={styles.container}>
+      <View contentContainerStyle={styles.scroll}>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
-
-        {/* USER HEADER */}
+        {/* ================= HEADER ================= */}
         <View style={styles.header}>
           <View style={styles.row}>
             <Image
@@ -15,217 +24,280 @@ export default function HomeDashboard() {
               style={styles.avatar}
             />
             <View>
-              <Text style={styles.username}>Hi, Bayzid 👋</Text>
+              <Text style={styles.username}>Hi, Bayzid</Text>
               <Text style={styles.subtitle}>Boost your career with AI</Text>
             </View>
           </View>
 
           <TouchableOpacity style={styles.refreshBtn}>
-            <Text style={styles.refreshIcon}>⟳</Text>
+            <Ionicons name="refresh" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
 
-        {/* CENTER ORB */}
+        {/* ================= CENTER ORB ================= */}
         <View style={styles.center}>
+          {/* Colorful Halo (no shadow = no black frame) */}
+          {/* <LinearGradient
+            colors={[
+              "rgba(168,85,247,0.45)",
+              "rgba(236,72,153,0.30)",
+              "transparent",
+            ]}
+            style={styles.orbHalo}
+          /> */}
+
           <LinearGradient
-            colors={["#ff2b6a", "#7d4cff", "#00d4ff"]}
+            colors={["#ff2b6a", "#a855f7", "#fbbf24", "#06b6d4"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.orb}
           >
-            <Text style={styles.orbIcon}>✨</Text>
+            <Ionicons name="sparkles" size={48} color="#fff" />
           </LinearGradient>
 
-          <View style={styles.shadowBar} />
+          <LinearGradient
+            colors={["rgba(168,85,247,0.35)", "transparent"]}
+            style={styles.shadowBar}
+          />
         </View>
 
-        {/* FEATURE GRID */}
+        {/* ================= FEATURE GRID ================= */}
         <View style={styles.grid}>
 
           <FeatureCard
             title="Speak with AI"
-            colors={["#ff2b6a", "#7d4cff"]}
+            icon="mic"
+            colors={["#ec4899", "#8b5cf6"]}
           />
 
           <FeatureCard
             title="Chat with AI"
-            colors={["#7d4cff", "#00d4ff"]}
+            icon="chatbubble-ellipses"
+            colors={["#8b5cf6", "#06b6d4"]}
           />
 
           <FeatureCard
             title="Generate Images"
-            colors={["#ff8a00", "#ff2b6a"]}
+            icon="image"
+            colors={["#f59e0b", "#ec4899"]}
           />
 
           <FeatureCard
             title="Scan to Search"
-            colors={["#00ffa3", "#00d4ff"]}
+            icon="scan"
+            colors={["#10b981", "#06b6d4"]}
           />
 
         </View>
 
-        {/* ASK BAR */}
-        <View style={styles.askBar}>
-          <TextInput
-            placeholder="Ask anything"
-            placeholderTextColor="#aaa"
-            style={styles.input}
-          />
-          <Text style={styles.sendIcon}>➤</Text>
+        {/* ================= ASK BAR ================= */}
+        <View style={styles.askBarContainer}>
+          <BlurView
+            intensity={25}
+            tint="dark"
+            experimentalBlurMethod="dimezisBlurView"
+            style={styles.askBar}
+          >
+            <TextInput
+              placeholder="Ask anything"
+              placeholderTextColor="#aaa"
+              style={styles.input}
+            />
+            <TouchableOpacity style={styles.sendBtn}>
+              <LinearGradient
+                colors={["#8b5cf6", "#06b6d4"]}
+                style={styles.sendGradient}
+              >
+                <Ionicons name="send" size={18} color="#fff" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </BlurView>
         </View>
 
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
-function FeatureCard({ title, colors }) {
+/* ================= FEATURE CARD ================= */
+function FeatureCard({ title, icon, colors }) {
   return (
-    <TouchableOpacity style={styles.cardWrapper}>
-      <LinearGradient
-        colors={colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.card}
-      >
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardDesc}>Tap to continue →</Text>
+    <TouchableOpacity style={styles.cardWrapper} activeOpacity={0.85}>
+      <LinearGradient colors={colors} style={styles.cardGradient}>
+        <BlurView
+          intensity={30}
+          tint="dark"
+          experimentalBlurMethod="dimezisBlurView"
+          style={styles.card}
+        >
+          <Ionicons name={icon} size={30} color="#fff" />
+          <View>
+            <Text style={styles.cardTitle}>{title}</Text>
+            <Text style={styles.cardDesc}>Tap to continue</Text>
+          </View>
+        </BlurView>
       </LinearGradient>
     </TouchableOpacity>
   );
 }
 
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
   container: {
+    padding: 10,
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "#000",
   },
 
   scroll: {
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 50,
+    paddingBottom: 40,
   },
 
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 20,
   },
 
   row: {
+    marginTop:10,
     flexDirection: "row",
     alignItems: "center",
   },
 
   avatar: {
-    width: 45,
-    height: 45,
-    borderRadius: 50,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     marginRight: 12,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.2)",
   },
 
   username: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "600",
+    color: "#fff",
+    fontSize: 19,
+    fontWeight: "700",
   },
 
   subtitle: {
-    color: "#aaaaaa",
-    fontSize: 11,
+    color: "#999",
+    fontSize: 12,
   },
 
   refreshBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 50,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    marginTop:10,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.08)",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  refreshIcon: {
-    color: "white",
-    fontSize: 22,
   },
 
   center: {
     alignItems: "center",
-    marginTop: 30,
+    marginTop: 40,
+    marginBottom: 60,
   },
 
   orb: {
-    width: 140,
-    height: 140,
-    borderRadius: 100,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  orbIcon: {
-    color: "white",
-    fontSize: 40,
+  orbHalo: {
+    position: "absolute",
+    width: 220,
+    height: 220,
+    borderRadius: 110,
   },
 
   shadowBar: {
-    width: 220,
-    height: 30,
-    marginTop: 8,
-    borderRadius: 50,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    width: 200,
+    height: 40,
+    marginTop: 10,
+    borderRadius: 20,
   },
 
   grid: {
-    marginTop: 70,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    marginBottom: 40,
   },
 
   cardWrapper: {
     width: "48%",
-    height: 130,
-    borderRadius: 20,
-    marginBottom: 15,
+    height: 150,
+    borderRadius: 26,
+    marginBottom: 18,
     overflow: "hidden",
+  },
+
+  cardGradient: {
+    flex: 1,
+    padding: 1.5,
+    borderRadius: 26,
   },
 
   card: {
     flex: 1,
-    borderRadius: 20,
-    padding: 15,
+    borderRadius: 24,
+    padding: 16,
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
 
   cardTitle: {
-    color: "white",
-    fontSize: 17,
-    fontWeight: "600",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
   },
 
   cardDesc: {
-    marginTop: 6,
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 11,
+  },
+
+  askBarContainer: {
+    marginTop: 10,
   },
 
   askBar: {
-    marginTop: 100,
     flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 50,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
+    borderRadius: 30,
+    paddingLeft: 20,
+    paddingRight: 6,
+    paddingVertical: 6,
     alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
   },
 
   input: {
     flex: 1,
-    color: "white",
-    fontSize: 14,
+    color: "#fff",
+    fontSize: 15,
   },
 
-  sendIcon: {
-    color: "white",
-    fontSize: 20,
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: "hidden",
+  },
+
+  sendGradient: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
