@@ -1,241 +1,144 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  Dimensions
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import React, { useEffect, useRef, useMemo } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Animated, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {useRouter} from "expo-router"
+const { width, height } = Dimensions.get('window');
 
-const { width } = Dimensions.get('window');
+// 1. Individual Twinkling Star for the Background
+const TwinklingStar = ({ style }) => {
 
-export default function IntroScreen() {
-  const router = useRouter();
-  
+  const opacity = useRef(new Animated.Value(Math.random())).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 1, duration: Math.random() * 2000 + 1000, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.1, duration: Math.random() * 2000 + 1000, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+  return <Animated.View style={[styles.star, style, { opacity }]} />;
+};
+
+export default function App() {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const shineAnim = useRef(new Animated.Value(0.5)).current;
+    const router = useRouter();
+
+  // Background Star Data
+  const bgStars = useMemo(() => {
+    return [...Array(40)].map((_, i) => ({
+      id: i, size: Math.random() * 2 + 1, x: Math.random() * width, y: Math.random() * height,
+    }));
+  }, []);
+
+  useEffect(() => {
+    // Orb Pulse & Float
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.08, duration: 2500, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 2500, useNativeDriver: true }),
+        ]),
+        Animated.sequence([
+          Animated.timing(floatAnim, { toValue: -15, duration: 3000, useNativeDriver: true }),
+          Animated.timing(floatAnim, { toValue: 0, duration: 3000, useNativeDriver: true }),
+        ]),
+        // Internal Star Shimmer
+        Animated.sequence([
+          Animated.timing(shineAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+          Animated.timing(shineAnim, { toValue: 0.4, duration: 1500, useNativeDriver: true }),
+        ]),
+      ])
+    ).start();
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#05010a' }]} />
+      
+      {/* Background Layer */}
+      {bgStars.map(s => <TwinklingStar key={s.id} style={{width: s.size, height: s.size, left: s.x, top: s.y}} />)}
 
-      {/* GLOWING ORB WITH RINGS */}
-      <View style={styles.orbContainer}>
-        {/* Outer glow rings */}
-        <View style={styles.glowRing1} />
-        <View style={styles.glowRing2} />
-        <View style={styles.glowRing3} />
-        
-        {/* Main orb */}
-        <LinearGradient
-          colors={["#a78bfa", "#ec4899", "#fbbf24"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.orb}
-        >
-          <View style={styles.innerGlow}>
-            <Text style={styles.sparkles}>✨</Text>
-          </View>
-        </LinearGradient>
+      <View style={styles.content}>
+        {/* Animated Orb with Shining Stars Inside */}
+        <Animated.View style={[
+          styles.orbContainer, 
+          { transform: [{ scale: pulseAnim }, { translateY: floatAnim }] }
+        ]}>
+          <LinearGradient
+            colors={['#c084fc', '#6366f1', '#fbbf24']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.orb}
+          >
+            {/* Shining Stars Layer */}
+            <Animated.View style={{ opacity: shineAnim, alignItems: 'center', justifyContent: 'center' }}>
+               <MaterialCommunityIcons name="sparkles" size={42} color="white" style={styles.centerStar} />
+               <MaterialCommunityIcons name="star-four-points" size={14} color="white" style={styles.topRightStar} />
+               <MaterialCommunityIcons name="star-four-points" size={10} color="white" style={styles.bottomLeftStar} />
+            </Animated.View>
+          </LinearGradient>
+          <View style={styles.orbRing} />
+        </Animated.View>
+
+        {/* UI Text */}
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>Ask{'\n'}anything</Text>
+          <Text style={styles.subtitle}>Spark brilliance</Text>
+          <Text style={styles.tagline}>Let AI elevate your craft.</Text>
+        </View>
+
+        {/* Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={()=>router.push("/authentication/signup")} activeOpacity={0.8} style={styles.buttonWrapper}>
+            <LinearGradient colors={['#2e1065', '#1e1b4b']} style={styles.button}>
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={(()=>router.push("/authentication/login"))} activeOpacity={0.8} style={styles.buttonWrapper} >
+            <LinearGradient colors={['#1e1b4b', '#0f172a']} style={styles.button}>
+              <Text style={styles.buttonText}>Sign In</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* TEXT */}
-      <View style={styles.textContainer}>
-        <Text style={styles.askText}>Ask</Text>
-        <Text style={styles.anythingText}>anything</Text>
-      </View>
-
-      <Text style={styles.subtitle}>
-        Spark brilliance{'\n'}Let AI elevate your craft.
-      </Text>
-
-      {/* PAGINATION DOTS */}
-      <View style={styles.dotsContainer}>
-        <View style={styles.dotInactive} />
-        <View style={styles.dotActive} />
-        <View style={styles.dotInactive} />
-        <View style={styles.dotInactive} />
-      </View>
-
-      {/* BUTTONS */}
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          activeOpacity={0.8}
-          onPress={() => router.push("/authentication/signup")}
-        >
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.button}
-          activeOpacity={0.8}
-          onPress={() => router.push("/authentication/login")}
-        >
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* BOTTOM GLOW */}
       <LinearGradient
-        colors={["transparent", "rgba(168, 85, 247, 0.3)", "rgba(236, 72, 153, 0.3)"]}
+        colors={['transparent', 'rgba(192, 132, 252, 0.2)', 'rgba(99, 102, 241, 0.4)']}
         style={styles.bottomGlow}
-        pointerEvents="none"
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000000",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  star: { position: 'absolute', backgroundColor: '#fff', borderRadius: 5 },
+  content: { zIndex: 10, alignItems: 'center', width: '100%' },
+  orbContainer: { marginBottom: 60, alignItems: 'center', justifyContent: 'center' },
+  orb: { 
+    width: 120, height: 120, borderRadius: 60, 
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#c084fc', shadowRadius: 30, shadowOpacity: 1 
   },
-
-  orbContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 50,
-    width: 220,
-    height: 220,
+  centerStar: { textShadowColor: '#fff', textShadowRadius: 15 },
+  topRightStar: { position: 'absolute', top: -10, right: -10 },
+  bottomLeftStar: { position: 'absolute', bottom: -5, left: -10 },
+  orbRing: { 
+    position: 'absolute', width: 160, height: 160, borderRadius: 80, 
+    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)' 
   },
-
-  glowRing1: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.3)',
-    backgroundColor: 'transparent',
-  },
-
-  glowRing2: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.4)',
-    backgroundColor: 'transparent',
-  },
-
-  glowRing3: {
-    position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(168, 85, 247, 0.2)',
-  },
-
-  orb: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#a78bfa",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 40,
-    elevation: 20,
-  },
-
-  innerGlow: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 60,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  sparkles: {
-    fontSize: 40,
-  },
-
-  textContainer: {
-    alignItems: "center",
-    marginBottom: 12,
-  },
-
-  askText: {
-    color: "#ffffff",
-    fontSize: 52,
-    fontWeight: "300",
-    letterSpacing: 0.5,
-  },
-
-  anythingText: {
-    color: "#ffffff",
-    fontSize: 52,
-    fontWeight: "300",
-    letterSpacing: 0.5,
-    marginTop: -10,
-  },
-
-  subtitle: {
-    color: "#9ca3af",
-    fontSize: 15,
-    textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 40,
-    fontWeight: "400",
-  },
-
-  dotsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 50,
-  },
-
-  dotInactive: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#374151",
-    marginHorizontal: 4,
-  },
-
-  dotActive: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#ffffff",
-    marginHorizontal: 4,
-  },
-
-  buttonsContainer: {
-    width: "100%",
-    maxWidth: 400,
-  },
-
-  button: {
-    width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-    marginBottom: 12,
-  },
-
-  buttonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-
-  bottomGlow: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 200,
-    width: width,
-  },
+  textContainer: { alignItems: 'center', marginBottom: 50 },
+  title: { fontSize: 56, color: '#fff', textAlign: 'center', fontWeight: '300' },
+  subtitle: { fontSize: 18, color: '#94a3b8', marginTop: 15 },
+  tagline: { fontSize: 15, color: '#64748b' },
+  buttonContainer: { width: '85%', gap: 15 },
+  buttonWrapper: { borderRadius: 30, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  button: { paddingVertical: 18, alignItems: 'center' },
+  buttonText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  bottomGlow: { position: 'absolute', bottom: 0, width: '100%', height: 120 },
 });
